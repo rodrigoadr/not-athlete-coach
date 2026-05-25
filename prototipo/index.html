@@ -9,69 +9,93 @@
         .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         h1 { font-size: 1.5rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
         h2 { font-size: 1.2rem; margin-top: 30px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .status-box { background: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
         
-        /* Estilo dos Botões Principais (Prompts) */
-        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: left; transition: background 0.3s; text-decoration: none; }
+        /* Caixa de Login */
+        .login-box { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        input[type="email"] { flex-grow: 1; padding: 12px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: #fff; min-width: 200px;}
+        
+        .status-box { background: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; }
+        
+        /* Botões */
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: left; transition: background 0.3s; text-decoration: none; box-sizing: border-box;}
+        .btn-login { width: auto; text-align: center; margin: 0; }
         .btn:hover { background: #0056b3; }
-        
-        /* Estilo dos Botões Secundários (Links Úteis) */
         .btn-secondary { background: #333; text-align: center; font-weight: bold; }
         .btn-secondary:hover { background: #444; }
         
-        .loader { font-style: italic; color: #aaa; }
+        /* Esconde a área tática até logar */
+        #area-tatica { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Not Athlete | Status da Máquina</h1>
+    <h1>Not Athlete | Inicialização</h1>
     
-    <div id="status" class="status-box">
-        <p class="loader">Lendo telemetria do Google Sheets...</p>
+    <div class="login-box">
+        <input type="email" id="emailInput" placeholder="Seu e-mail do check-in..." />
+        <button class="btn btn-login" onclick="carregarTelemetria()">Carregar</button>
+    </div>
+    
+    <div id="status" class="status-box"></div>
+
+    <div id="area-tatica">
+        <h2>Atalhos Táticos (Copiar Prompt)</h2>
+        <button class="btn" onclick="copiarPrompt('manutencao')">🔧 [1 Clique] Protocolo de Manutenção e Recuperação</button>
+        <button class="btn" onclick="copiarPrompt('foco')">🧠 [1 Clique] Gestão de Carga Neural e Treino</button>
     </div>
 
-    <h2>Atalhos Táticos (Copiar Prompt)</h2>
-    <button class="btn" onclick="copiarPrompt('manutencao')">🔧 [1 Clique] Protocolo de Manutenção e Recuperação</button>
-    <button class="btn" onclick="copiarPrompt('foco')">🧠 [1 Clique] Gestão de Carga Neural e Treino</button>
-
     <h2>Links Úteis</h2>
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdProSa4mSJQpV1rQNENndGwOqAlvDF72x7aYd3Dq7C-pJ03w/viewform?usp=sharing&ouid=111126279483965661161" target="_blank" class="btn btn-secondary">📝 Fazer Novo Check-in (Forms)</a>
-    <a href="https://docs.google.com/spreadsheets/d/1tf9sNxB1lnJzaNqnNMIzhoIr8jCwk-VERFb6PqYWV2A/edit?gid=1564164650#gid=1564164650" target="_blank" class="btn btn-secondary">📊 Ver Base de Dados (Sheets)</a>
+    <a href="URL_DO_SEU_FORMULARIO_AQUI" target="_blank" class="btn btn-secondary">📝 Fazer Novo Check-in (Forms)</a>
+    <a href="URL_DA_SUA_PLANILHA_AQUI" target="_blank" class="btn btn-secondary">📊 Ver Base de Dados (Sheets)</a>
 </div>
 
 <script>
-    // URL GERADA NO APPS SCRIPT
+    // A SUA URL DO APPS SCRIPT
     const API_URL = "https://script.google.com/macros/s/AKfycbxvyn95VvOfPmoFVH3cja2mZxE5kryCG5mXwV7thWkjgDp48maM6pjQ5LCzVSJ94pT8/exec"; 
     
     let dadosAtuais = {};
 
-    // Busca os dados da API
-    fetch(API_URL)
-        .then(response => response.json())
-        .then(data => {
-            dadosAtuais = data;
-            document.getElementById('status').innerHTML = `
-                <strong>Momento:</strong> ${data.momento} <br>
-                <strong>Objetivo Diário:</strong> ${data.objetivo} <br>
-                <strong>Nível de Energia:</strong> ${data.energia}/5 <br>
-                <strong>Foco Mental:</strong> ${data.foco}/5 <br>
-                <strong>Restrição/Dor:</strong> <span style="color:#ff4c4c;">${data.desconforto || "Nenhuma"}</span>
-            `;
-        })
-        .catch(error => {
-            document.getElementById('status').innerHTML = "Falha ao conectar com a base de dados.";
-        });
-
-    // Função para gerar o prompt personalizado e copiar para a área de transferência
-    function copiarPrompt(tipo) {
-        if (!dadosAtuais.energia) {
-            alert("Aguarde o carregamento dos dados da máquina.");
+    function carregarTelemetria() {
+        const email = document.getElementById('emailInput').value.trim();
+        const statusBox = document.getElementById('status');
+        
+        if (!email) {
+            alert("Insira o seu e-mail para buscar seus dados.");
             return;
         }
 
-        let promptText = "";
+        statusBox.style.display = 'block';
+        statusBox.innerHTML = "<em>Lendo telemetria na base...</em>";
 
+        // Chama a API passando o e-mail do usuário
+        fetch(`${API_URL}?email=${encodeURIComponent(email)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.erro) {
+                    statusBox.innerHTML = `<span style="color:#ff4c4c;">${data.erro}</span>`;
+                    document.getElementById('area-tatica').style.display = 'none';
+                    return;
+                }
+
+                dadosAtuais = data;
+                statusBox.innerHTML = `
+                    <strong>Momento:</strong> ${data.momento} <br>
+                    <strong>Objetivo Diário:</strong> ${data.objetivo} <br>
+                    <strong>Nível de Energia:</strong> ${data.energia}/5 <br>
+                    <strong>Foco Mental:</strong> ${data.foco}/5 <br>
+                    <strong>Restrição/Dor:</strong> <span style="color:#ff4c4c;">${data.desconforto || "Nenhuma"}</span>
+                `;
+                
+                document.getElementById('area-tatica').style.display = 'block';
+            })
+            .catch(error => {
+                statusBox.innerHTML = "Falha ao conectar com a base de dados.";
+            });
+    }
+
+    function copiarPrompt(tipo) {
+        let promptText = "";
         if (tipo === 'manutencao') {
             promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}. Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória (como magnésio ou contraste térmico) para otimizar a recuperação antes da próxima sessão de skate.`;
         } else if (tipo === 'foco') {
