@@ -108,7 +108,8 @@
                     <strong>Objetivo Diário:</strong> ${data.objetivo} <br>
                     <strong>Nível de Energia:</strong> ${data.energia}/5 <br>
                     <strong>Foco Mental:</strong> ${data.foco}/5 <br>
-                    <strong>Restrição/Dor:</strong> <span style="color:#ff4c4c;">${data.desconforto || "Nenhuma"}</span>
+                    <strong>Restrição/Dor:</strong> <span style="color:#ff4c4c;">${data.desconforto || "Nenhuma"}</span> <br>
+                    <strong>Relato do Dia:</strong> <span style="color:#aaa;"><em>"${data.relato || "Sem relatos adicionais hoje."}"</em></span>
                 `;
                 
                 document.getElementById('area-tatica').style.display = 'block';
@@ -130,10 +131,14 @@
 
     function copiarPrompt(tipo) {
         let promptText = "";
+        
+        // Incluímos o relato nos prompts para dar ainda mais contexto à IA
+        let relatoExtra = dadosAtuais.relato ? ` Hoje também relatei o seguinte: "${dadosAtuais.relato}".` : "";
+
         if (tipo === 'manutencao') {
-            promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}. Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória para otimizar a recuperação antes da próxima sessão de skate.`;
+            promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}.${relatoExtra} Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória para otimizar a recuperação antes da próxima sessão de skate.`;
         } else if (tipo === 'foco') {
-            promptText = `Atue como meu Not Athlete Coach. O foco mental hoje está em ${dadosAtuais.foco}/5 após minha rotina pesada. Meu nível de energia é ${dadosAtuais.energia}/5 e tenho o seguinte desconforto: ${dadosAtuais.desconforto}. Gere uma estratégia pragmática de micro-pausas táticas para hoje e adapte meu treino de hipertrofia para volume e carga adequados, garantindo a longevidade esportiva.`;
+            promptText = `Atue como meu Not Athlete Coach. O foco mental hoje está em ${dadosAtuais.foco}/5 após minha rotina pesada. Meu nível de energia é ${dadosAtuais.energia}/5 e tenho o seguinte desconforto: ${dadosAtuais.desconforto}.${relatoExtra} Gere uma estratégia pragmática de micro-pausas táticas para hoje e adapte meu treino de hipertrofia para volume e carga adequados, garantindo a longevidade esportiva.`;
         }
 
         navigator.clipboard.writeText(promptText).then(() => {
