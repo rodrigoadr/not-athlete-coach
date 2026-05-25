@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+s<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,12 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #f5f5f5; padding: 20px; line-height: 1.6; }
         .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        h1 { font-size: 1.5rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        
+        .header-top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;}
+        h1 { font-size: 1.5rem; margin: 0; }
+        .btn-logout { background: none; border: none; color: #aaa; text-decoration: underline; cursor: pointer; font-size: 0.8rem; }
+        .btn-logout:hover { color: #fff; }
+        
         h2 { font-size: 1.2rem; margin-top: 30px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
         /* Caixa de Login */
@@ -23,16 +28,19 @@
         .btn-secondary { background: #333; text-align: center; font-weight: bold; }
         .btn-secondary:hover { background: #444; }
         
-        /* Esconde a área tática até logar */
+        /* Esconde as áreas até logar */
         #area-tatica { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Not Athlete | Inicialização</h1>
+    <div class="header-top">
+        <h1>Not Athlete</h1>
+        <button id="btnLogout" class="btn-logout" onclick="limparMemoria()" style="display:none;">Trocar E-mail</button>
+    </div>
     
-    <div class="login-box">
+    <div id="loginSection" class="login-box">
         <input type="email" id="emailInput" placeholder="Seu e-mail do check-in..." />
         <button class="btn btn-login" onclick="carregarTelemetria()">Carregar</button>
     </div>
@@ -46,8 +54,8 @@
     </div>
 
     <h2>Links Úteis</h2>
-    <a href="URL_DO_SEU_FORMULARIO_AQUI" target="_blank" class="btn btn-secondary">📝 Fazer Novo Check-in (Forms)</a>
-    <a href="URL_DA_SUA_PLANILHA_AQUI" target="_blank" class="btn btn-secondary">📊 Ver Base de Dados (Sheets)</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdProSa4mSJQpV1rQNENndGwOqAlvDF72x7aYd3Dq7C-pJ03w/viewform?usp=sharing&ouid=111126279483965661161" target="_blank" class="btn btn-secondary">📝 Fazer Novo Check-in (Forms)</a>
+    <a href="https://docs.google.com/spreadsheets/d/1tf9sNxB1lnJzaNqnNMIzhoIr8jCwk-VERFb6PqYWV2A/edit?gid=1564164650#gid=1564164650" target="_blank" class="btn btn-secondary">📊 Ver Base de Dados (Sheets)</a>
 </div>
 
 <script>
@@ -55,6 +63,15 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxvyn95VvOfPmoFVH3cja2mZxE5kryCG5mXwV7thWkjgDp48maM6pjQ5LCzVSJ94pT8/exec"; 
     
     let dadosAtuais = {};
+
+    // Quando a página carrega, verifica se o e-mail já está salvo no aparelho
+    window.onload = function() {
+        const emailSalvo = localStorage.getItem('notAthleteEmail');
+        if (emailSalvo) {
+            document.getElementById('emailInput').value = emailSalvo;
+            carregarTelemetria(); // Dispara o carregamento automaticamente
+        }
+    };
 
     function carregarTelemetria() {
         const email = document.getElementById('emailInput').value.trim();
@@ -65,6 +82,12 @@
             return;
         }
 
+        // Salva o e-mail na memória do navegador para as próximas vezes
+        localStorage.setItem('notAthleteEmail', email);
+
+        // Ajusta a interface visual
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('btnLogout').style.display = 'block';
         statusBox.style.display = 'block';
         statusBox.innerHTML = "<em>Lendo telemetria na base...</em>";
 
@@ -94,12 +117,22 @@
             });
     }
 
+    // Função para esquecer o e-mail e permitir trocar a conta
+    function limparMemoria() {
+        localStorage.removeItem('notAthleteEmail');
+        document.getElementById('emailInput').value = '';
+        document.getElementById('loginSection').style.display = 'flex';
+        document.getElementById('btnLogout').style.display = 'none';
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('area-tatica').style.display = 'none';
+    }
+
     function copiarPrompt(tipo) {
         let promptText = "";
         if (tipo === 'manutencao') {
-            promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}. Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória (como magnésio ou contraste térmico) para otimizar a recuperação antes da próxima sessão de skate.`;
+            promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}. Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória para otimizar a recuperação antes da próxima sessão de skate.`;
         } else if (tipo === 'foco') {
-            promptText = `Atue como meu Not Athlete Coach. O foco mental hoje está em ${dadosAtuais.foco}/5 após minha rotina pesada. Meu nível de energia é ${dadosAtuais.energia}/5 e tenho o seguinte desconforto: ${dadosAtuais.desconforto}. Gere uma estratégia pragmática de micro-pausas táticas para hoje e adapte meu treino de hipertrofia para volume e carga adequados, protegendo o sistema nervoso central sem perder o estímulo mecânico e garantindo a longevidade esportiva.`;
+            promptText = `Atue como meu Not Athlete Coach. O foco mental hoje está em ${dadosAtuais.foco}/5 após minha rotina pesada. Meu nível de energia é ${dadosAtuais.energia}/5 e tenho o seguinte desconforto: ${dadosAtuais.desconforto}. Gere uma estratégia pragmática de micro-pausas táticas para hoje e adapte meu treino de hipertrofia para volume e carga adequados, garantindo a longevidade esportiva.`;
         }
 
         navigator.clipboard.writeText(promptText).then(() => {
