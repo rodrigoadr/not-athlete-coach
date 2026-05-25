@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Not Athlete | Central de Comando</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #f5f5f5; padding: 20px; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        h1 { font-size: 1.5rem; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .status-box { background: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; text-align: left; transition: background 0.3s; }
+        .btn:hover { background: #0056b3; }
+        .loader { font-style: italic; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Not Athlete | Status da Máquina</h1>
+    
+    <div id="status" class="status-box">
+        <p class="loader">Lendo telemetria do Google Sheets...</p>
+    </div>
+
+    <h2>Atalhos Táticos (Copiar Prompt)</h2>
+    <button class="btn" onclick="copiarPrompt('manutencao')">🔧 [1 Clique] Protocolo de Manutenção e Recuperação</button>
+    <button class="btn" onclick="copiarPrompt('foco')">🧠 [1 Clique] Gestão de Carga Neural e Treino</button>
+</div>
+
+<script>
+    // COLE AQUI A URL GERADA NO APPS SCRIPT
+    const API_URL = "SUA_URL_DO_APPS_SCRIPT_AQUI"; 
+    
+    let dadosAtuais = {};
+
+    // Busca os dados da API
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+            dadosAtuais = data;
+            document.getElementById('status').innerHTML = `
+                <strong>Momento:</strong> ${data.momento} <br>
+                <strong>Objetivo Diário:</strong> ${data.objetivo} <br>
+                <strong>Nível de Energia:</strong> ${data.energia}/5 <br>
+                <strong>Foco Mental:</strong> ${data.foco}/5 <br>
+                <strong>Restrição/Dor:</strong> <span style="color:#ff4c4c;">${data.desconforto || "Nenhuma"}</span>
+            `;
+        })
+        .catch(error => {
+            document.getElementById('status').innerHTML = "Falha ao conectar com a base de dados.";
+        });
+
+    // Função para gerar o prompt personalizado e copiar para a área de transferência
+    function copiarPrompt(tipo) {
+        if (!dadosAtuais.energia) {
+            alert("Aguarde o carregamento dos dados da máquina.");
+            return;
+        }
+
+        let promptText = "";
+
+        if (tipo === 'manutencao') {
+            promptText = `Atue como meu Not Athlete Coach. Meu painel hoje aponta energia nível ${dadosAtuais.energia}/5 e restrição de: ${dadosAtuais.desconforto}. Meu foco atual é ${dadosAtuais.objetivo}. Monte um protocolo direto e pragmático de biomecânica e mobilidade de 12 minutos focado na liberação dessa tensão e ajuste minha suplementação anti-inflamatória (como magnésio ou contraste térmico) para otimizar a recuperação antes da próxima sessão de skate.`;
+        } else if (tipo === 'foco') {
+            promptText = `Atue como meu Not Athlete Coach. O foco mental hoje está em ${dadosAtuais.foco}/5 após minha rotina pesada. Meu nível de energia é ${dadosAtuais.energia}/5 e tenho o seguinte desconforto: ${dadosAtuais.desconforto}. Gere uma estratégia pragmática de micro-pausas táticas para hoje e adapte meu treino de hipertrofia para volume e carga adequados, protegendo o sistema nervoso central sem perder o estímulo mecânico e garantindo a longevidade esportiva.`;
+        }
+
+        navigator.clipboard.writeText(promptText).then(() => {
+            alert("Prompt tático copiado para a área de transferência! Cole no seu LLM.");
+        });
+    }
+</script>
+
+</body>
+</html>
